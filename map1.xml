@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<map dimension="10">
+	<row index="0">
+<!-- b = box ; w = wall ; e = exit ; p = empty path--> 
+		<entities entities= "bbebbppepp"></entities>
+	</row>
+	<row index="1">
+		<entities entities= "bbebbppepp"></entities>
+	</row>
+	<row index="2">
+		<entities entities="bbebbppepp></entities>
+	</row>
+	<row index="3">
+		<entities entities= "bbebbppepp"></entities>
+	</row>
+	<row index="4">
+		<entities entities= "bbebbppepp"></entities>
+	</row>
+	<row index="5">
+		<entities entities= "pbbebbpppe"></entities>
+	</row>
+	<row index="6">
+		<entities entities= "wwppwwppww"></entities>
+	</row>
+	<row index="7">
+		<entities entities= "wwppwwppww"></entities>
+	</row>
+	<row index="8">
+		<entities entities= "wwppbbebpp"></entities>
+	</row>
+	<row index="9">
+		<entities entities= "bbebbppepp"></entities>
+	</row>
+	
+</map>
