@@ -1,27 +1,29 @@
 package UDPReciever;
 
 import java.awt.event.*;
-import java.io.IOException;
 import java.net.*;
 
-public class ConcurrentServer {
+public class Communication {
     
+    InetAddress player;
     int recvPort = 5000;
-    ServerSocket server;
+    
+    DatagramPacket recvPack, newPack;
+    boolean newPacket = false;
+    Receiver recv;
+    
     ActionListener al;
     
-    public ConcurrentServer(ActionListener al) throws IOException{
+    public Communication(ActionListener al){
         
         this.al = al;
-        server = new ServerSocket(recvPort);
         init();
     }
     
     public void init(){
         
-        while(true){
-            Socket sock = server.accept();
-            
-        }
+        recv = new Receiver(al, recvPort);
+        new Thread(recv).start();
+        
     }
 }
