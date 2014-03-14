@@ -4,7 +4,7 @@
  */
 package bomberman;
 
-import static java.awt.image.ImageObserver.WIDTH;
+import java.net.URL;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JTable;
@@ -25,12 +25,16 @@ public class MapView extends javax.swing.JFrame {
     private ImageIcon wallIcon;
     private ImageIcon boxIcon;
     private ImageIcon exitIcon;
+    
+    private URL GRASS_ICON_DIR = this.getClass().getClassLoader().getResource("res/PATH1.JPG");
+    private URL WALL_ICON_DIR = this.getClass().getClassLoader().getResource("res/WALL1.JPG");
+    private URL BOX_ICON_DIR = this.getClass().getClassLoader().getResource("res/BOX1.JPG");
+    private URL EXIT_ICON_DIR = this.getClass().getClassLoader().getResource("res/EXIT1.JPG");
 
     public MapView(MapModel model) {
         this.model = model;
         initComponents();
         initImages();
-
 
         MapTableModel mapTableModel = new MapTableModel();
         mapTableModel.setColumnCount(10);
@@ -81,10 +85,11 @@ public class MapView extends javax.swing.JFrame {
     }
 
     private void initImages() {
-        grassIcon = new ImageIcon("C:\\Users\\abdullahadeeb\\Pictures\\PATH1.JPG");
-        wallIcon = new ImageIcon("C:\\Users\\abdullahadeeb\\Pictures\\WALL1.JPG");
-        boxIcon = new ImageIcon("C:\\Users\\abdullahadeeb\\Pictures\\BOX1.JPG");
-        exitIcon = new ImageIcon("C:\\Users\\abdullahadeeb\\Pictures\\EXIT1.JPG");
+        grassIcon = new ImageIcon(GRASS_ICON_DIR);
+        wallIcon = new ImageIcon(WALL_ICON_DIR);
+        boxIcon = new ImageIcon(BOX_ICON_DIR);
+        exitIcon = new ImageIcon(EXIT_ICON_DIR);
+       
     }
 
     @SuppressWarnings("unchecked")

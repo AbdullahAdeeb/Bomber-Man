@@ -1,36 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <map dimension="10">
 	<row index="0">
-<!-- b = box ; w = wall ; e = exit ; p = empty path--> 
-		<entities entities= "bbebbppepp"></entities>
+	<!-- b = box ; w = wall ; e = exit ; p = empty path--> 
+		b-b-w-b-b-p-p-w-p-p
 	</row>
 	<row index="1">
-		<entities entities= "bbebbppepp"></entities>
+		b-b-w-b-b-p-p-w-p-p
 	</row>
 	<row index="2">
-		<entities entities="bbebbppepp></entities>
+		b-b-w-b-b-p-p-w-p-p
 	</row>
 	<row index="3">
-		<entities entities= "bbebbppepp"></entities>
+		b-b-w-b-b-p-p-w-p-p
 	</row>
 	<row index="4">
-		<entities entities= "bbebbppepp"></entities>
+		b-b-w-b-b-p-p-w-p-p
 	</row>
 	<row index="5">
-		<entities entities= "pbbebbpppe"></entities>
+		p-b-b-w-b-b-p-p-e-w
 	</row>
 	<row index="6">
-		<entities entities= "wwppwwppww"></entities>
+		w-w-p-p-w-w-p-p-w-w
 	</row>
 	<row index="7">
-		<entities entities= "wwppwwppww"></entities>
+		w-w-p-p-w-w-p-p-w-w
 	</row>
 	<row index="8">
-		<entities entities= "wwppbbebpp"></entities>
+		w-w-p-p-b-b-w-b-p-p
 	</row>
 	<row index="9">
-		<entities entities= "bbebbppepp"></entities>
+		b-b-w-b-b-p-p-w-p-p
 	</row>
-	
 </map>

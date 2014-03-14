@@ -28,12 +28,12 @@ public class Logging extends Thread {
         /*
          * main just for testing the logging for now
          */
-	public static void main(String[] args) throws Exception
-	{
-		
-		Logging log = new Logging();
-		log.writeLogFile("derpp derp");
-	}
+//	public static void main(String[] args) throws Exception
+//	{
+//		
+//		Logging log = new Logging();
+//		log.writeLogFile("derpp derp");
+//	}
 	
 	 
 }
