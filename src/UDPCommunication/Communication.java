@@ -48,4 +48,9 @@ public class Communication {
         sendPack = new DatagramPacket(cmd, cmd.length, player, recvPort);
         send.sendCmd(sendPack);
     }
+    
+    public void close(){
+        recv.close();
+        send.close();
+    }
 }

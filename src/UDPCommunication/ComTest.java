@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package UDPCommunication;
 
 import java.io.IOException;
@@ -15,10 +11,10 @@ public class ComTest {
         Thread.sleep(2000);
         
         Client p1 = new Client(1);
-        Client p2 = new Client(2);
+        //Client p2 = new Client(2);
        
         p1.start();
-        p2.start();
+        //p2.start();
     }
     
 }

@@ -53,4 +53,8 @@ public class Receiver implements Runnable{
         
         return cmd.getData()[i];
     }
+    
+    public void close(){
+        recvSock.close();
+    }
 }

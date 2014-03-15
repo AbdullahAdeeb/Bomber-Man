@@ -21,7 +21,6 @@ public class Client extends Thread{
      *  4 - RIGHT
      *  5 - Drop Bomb
      */
-    
     private int getCmd(String cmd){
         
         int play;
@@ -41,6 +40,12 @@ public class Client extends Thread{
             case "drop":
                 play = 5;
                 break;
+            case "exit":
+                play = 6;
+                break;
+            case "who":
+                play = 7;
+                break;
             default:
                 play = 0;
                 break;
@@ -50,6 +55,8 @@ public class Client extends Thread{
     
     public void playerAction(){
         
+        com.send(ID, 0);
+        
         while(true){
             Scanner scan = new Scanner(System.in);
             String text = scan.nextLine();
@@ -57,7 +64,12 @@ public class Client extends Thread{
             int cmd = getCmd(text);
             if(cmd != 0){
                 com.send(ID, cmd);
-            }    
+                if(cmd == 6){
+                    com.close();
+                    System.out.println("Closing...\n");
+                    break;
+                } 
+            }  
         }
     }
     
