@@ -1,13 +1,13 @@
-package bomberman;
+package Log;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
 //I can move the logging() method to run(). 
-public class Logging extends Thread {
+public class Logger extends Thread {
 	FileWriter fw;
-	public Logging() throws IOException{
+	public Logger() throws IOException{
 		
 	fw = new FileWriter("GameLogs.txt", true);
 		

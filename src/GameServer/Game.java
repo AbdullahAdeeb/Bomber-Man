@@ -2,8 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package bomberman;
 
+package GameServer;
+
+import GameView.MapModel;
+import GameView.MapView;
 import java.util.ArrayList;
 
 /**
@@ -21,6 +24,8 @@ public class Game {
         playersPawns = new ArrayList();
 
     }
+    
+    
 
     public static void main(String[] args) {
         Game game;

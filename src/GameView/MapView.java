@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package bomberman;
+package GameView;
 
+import java.awt.Color;
 import java.net.URL;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -25,11 +26,11 @@ public class MapView extends javax.swing.JFrame {
     private ImageIcon wallIcon;
     private ImageIcon boxIcon;
     private ImageIcon exitIcon;
-    
     private URL GRASS_ICON_DIR = this.getClass().getClassLoader().getResource("res/PATH1.JPG");
     private URL WALL_ICON_DIR = this.getClass().getClassLoader().getResource("res/WALL1.JPG");
     private URL BOX_ICON_DIR = this.getClass().getClassLoader().getResource("res/BOX1.JPG");
     private URL EXIT_ICON_DIR = this.getClass().getClassLoader().getResource("res/EXIT1.JPG");
+    private URL FACE_ICON_DIR = this.getClass().getClassLoader().getResource("res/FACE1.JPG");
 
     public MapView(MapModel model) {
         this.model = model;
@@ -63,25 +64,20 @@ public class MapView extends javax.swing.JFrame {
                 }
             }
         }// done for loop
-        this.mapTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        TableColumnModel columnModel = this.mapTable.getColumnModel();
-
-        for (int i = 0; i < columnModel.getColumnCount(); i++) {
-//            columnModel.getColumn(i).sizeWidthToFit();
-            columnModel.setColumnSelectionAllowed(false);
-//            columnModel.getColumn(i).setWidth(40);
-//            mapTable.getColumnModel().getColumn(i).setWidth(40);
-//            columnModel.getColumn(i).setMinWidth(50);
-//            columnModel.getColumn(i).setMaxWidth(50);
-        }
-//        for (int i = 0; i < mapTableModel.getRowCount(); i++) {
-            mapTable.setRowHeight(50);
-            mapTable.setShowGrid(false);
-            
-//        }
-
-
         this.mapTable.setModel(mapTableModel);
+        this.mapTable.setCellSelectionEnabled(false);
+        this.mapTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        
+        
+        TableColumnModel columnModel = this.mapTable.getColumnModel();
+        for (int i = 0; i < columnModel.getColumnCount(); i++) {
+            columnModel.getColumn(i).sizeWidthToFit();
+        }
+        mapTable.setShowGrid(false);
+        this.mapPanel.setBackground(Color.BLUE);
+        this.mapTable.setPreferredScrollableViewportSize(this.mapTable.getSize());
+        this.mapPanel.setSize(this.mapTable.getSize());
+
     }
 
     private void initImages() {
@@ -89,7 +85,7 @@ public class MapView extends javax.swing.JFrame {
         wallIcon = new ImageIcon(WALL_ICON_DIR);
         boxIcon = new ImageIcon(BOX_ICON_DIR);
         exitIcon = new ImageIcon(EXIT_ICON_DIR);
-       
+
     }
 
     @SuppressWarnings("unchecked")
@@ -105,6 +101,7 @@ public class MapView extends javax.swing.JFrame {
 
         mapPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        mapTable.setBackground(new java.awt.Color(0, 0, 0));
         mapTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -116,6 +113,13 @@ public class MapView extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        mapTable.setEnabled(false);
+        mapTable.setMaximumSize(new java.awt.Dimension(600, 600));
+        mapTable.setMinimumSize(new java.awt.Dimension(0, 0));
+        mapTable.setPreferredSize(new java.awt.Dimension(600, 600));
+        mapTable.setRowHeight(60);
+        mapTable.setRowMargin(0);
+        mapTable.setTableHeader(null);
         jScrollPane1.setViewportView(mapTable);
 
         javax.swing.GroupLayout mapPanelLayout = new javax.swing.GroupLayout(mapPanel);
@@ -124,14 +128,14 @@ public class MapView extends javax.swing.JFrame {
             mapPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mapPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE)
-                .addGap(16, 16, 16))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 610, Short.MAX_VALUE)
+                .addContainerGap())
         );
         mapPanelLayout.setVerticalGroup(
             mapPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mapPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 634, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 610, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
