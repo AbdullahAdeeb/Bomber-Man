@@ -5,10 +5,13 @@ import java.net.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ *
+ * @author zachcousins
+ */
 public class Communication {
     
     InetAddress player;
-    int recvPort = 5000;
     
     DatagramPacket recvPack, sendPack;
     DatagramSocket recvSock, sendSock;
@@ -33,11 +36,14 @@ public class Communication {
     private void init(){
         
         if(sc == 0){
-            recv = new Receiver(al);
+            recv = new Receiver(al, 5000);
             new Thread(recv).start();
-        }else{
             send = new Sender();
-        } 
+        }else{
+            recv = new Receiver(al, 6000+sc);
+            new Thread(recv).start();
+            send = new Sender();
+        }
     }
     
     public void send(int p, int c){
@@ -45,7 +51,11 @@ public class Communication {
         byte[] cmd = new byte[2];
         cmd[0] = (byte)p;
         cmd[1] = (byte)c;
-        sendPack = new DatagramPacket(cmd, cmd.length, player, recvPort);
+        if(sc == 0){
+            sendPack = new DatagramPacket(cmd, cmd.length, player, 6000+p);
+        }else{
+            sendPack = new DatagramPacket(cmd, cmd.length, player, 5000);
+        }
         send.sendCmd(sendPack);
     }
     

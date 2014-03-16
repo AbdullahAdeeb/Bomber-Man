@@ -4,6 +4,10 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 
+/**
+ *
+ * @author zachcousins
+ */
 public class Server {
     
     Communication com;
@@ -33,8 +37,9 @@ public class Server {
                 players.remove((Object)p);
                 System.out.println("--RECEIVED CMD--\nPlayer Left: " + p + "\n");
             }else if(c == 7){
-                System.out.println(players);
+                System.out.println(players.toString());
             }
+            com.send(p, 1);
         }
     }
 }

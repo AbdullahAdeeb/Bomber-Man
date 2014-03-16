@@ -6,19 +6,24 @@ import java.net.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ *
+ * @author zachcousins
+ */
 public class Receiver implements Runnable{
   
     DatagramPacket recvPack;
     DatagramSocket recvSock;
     boolean listen = true;
     boolean newPack = false;
-    int port = 5000;
+    int port;
     
     ActionListener actionList;
     
-    public Receiver(ActionListener al){
+    public Receiver(ActionListener al, int port){
         
         this.actionList = al;
+        this.port = port;
         try {
             recvSock = new DatagramSocket(port);
         } catch (SocketException ex) {

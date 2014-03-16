@@ -2,9 +2,15 @@
 
 package UDPCommunication;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.*;
 import java.util.*;
 
+/**
+ *
+ * @author zachcousins
+ */
 public class Client extends Thread{
 
     final int ID;
@@ -12,7 +18,7 @@ public class Client extends Thread{
     
     public Client(int ID) throws SocketException {
         this.ID = ID;
-        com = new Communication(null, 1);
+        com = new Communication(new IncomingActionListener(), ID);
     }
     
     /*  1 - UP
@@ -60,7 +66,7 @@ public class Client extends Thread{
         while(true){
             Scanner scan = new Scanner(System.in);
             String text = scan.nextLine();
-            System.out.println(text);
+            //System.out.println(text);
             int cmd = getCmd(text);
             if(cmd != 0){
                 com.send(ID, cmd);
@@ -78,6 +84,21 @@ public class Client extends Thread{
         System.out.print("Player Start\n");
         playerAction();
         
+    }
+    
+    class IncomingActionListener implements ActionListener{
+        
+        @Override
+        public void actionPerformed(ActionEvent e){
+            
+            String actionCmd = e.getActionCommand();
+            int p = Character.getNumericValue(actionCmd.charAt(0));
+            int c = Character.getNumericValue(actionCmd.charAt(1));
+            
+            if(p == ID){
+                System.out.println("AWK");
+            }
+        }
     }
 }
 

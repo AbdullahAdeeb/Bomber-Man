@@ -5,13 +5,16 @@ import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ *
+ * @author zachcousins
+ */
 public class Sender {
     
     DatagramSocket sendSock;
-    int port;
 
     public Sender(){
-
+        
         try {
             sendSock = new DatagramSocket();
         } catch (SocketException ex) {
@@ -21,7 +24,7 @@ public class Sender {
     
     public void sendCmd(DatagramPacket send){
         
-        System.out.println("Sending...\nPlayer: " + send.getData()[0] + "\tCmd: " + send.getData()[1]);
+        System.out.println("\nSending...\nPlayer: " + send.getData()[0] + "\tCMD: " + send.getData()[1]);
         try {
             sendSock.send(send);
         } catch (IOException ex) {
