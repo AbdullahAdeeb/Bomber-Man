@@ -4,8 +4,6 @@
  */
 package GameView;
 
-import javax.swing.ImageIcon;
-
 /**
  *
  * @author abdullahadeeb
@@ -16,15 +14,13 @@ public class Entity {
     public static final int BOX = 222;
     public static final int PATH = 333;
     public static final int EXIT = 444;
+    
     private boolean destructable;
     private boolean path = false;
     private int type;
-    private boolean isPlayerPawnOn = false;
-    private ImageIcon icon;
 
-    Entity(int type,ImageIcon icon) {
+    Entity(int type) {
         this.type = type;
-        this.icon = icon;
         switch (type) {
             case WALL:
                 this.destructable = false;
@@ -35,20 +31,9 @@ public class Entity {
                 this.path = true;
             case EXIT:
                 this.destructable = false;
+
         }
-    }
 
-    
-    public boolean isIsPlayerPawnOn() {
-        return isPlayerPawnOn;
-    }
-
-    public void setIsPlayerPawnOn(boolean isPlayerPawnOn) {
-        this.isPlayerPawnOn = isPlayerPawnOn;
-    }
-
-    public ImageIcon getIcon() {
-        return icon;
     }
 
     public int getType() {
