@@ -10,7 +10,7 @@ import java.util.logging.Logger;
  *
  * @author zachcousins
  */
-public class Receiver implements Runnable{
+class Receiver implements Runnable{
   
     DatagramPacket recvPack;
     DatagramSocket recvSock;
@@ -55,7 +55,6 @@ public class Receiver implements Runnable{
     }
     
     private int getCmd(DatagramPacket cmd, int i){
-        
         return cmd.getData()[i];
     }
     

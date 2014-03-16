@@ -12,15 +12,16 @@ import GameView.MapModel;
  */
 public class PlayerPawn {
 
-    public final static int RIGHT = 3412;
-    public final static int FORWARD = 1234;
-    public final static int BACKWARD = 4321;
-    public final static int LEFT = 2143;
-    int x;
-    int y;
-    BombsFactory bombsFactory;
-    int id;
-    MapModel map;
+    public final static int RIGHT = 1;
+    public final static int FORWARD = 2;
+    public final static int BACKWARD = 3;
+    public final static int LEFT = 4;
+    public final static int DROP = 5;
+    private int x;
+    private int y;
+    private BombsFactory bombsFactory;
+    private int id;
+    private MapModel map;
 
     PlayerPawn(int id, MapModel mapModel) {
         this.id = id;
@@ -32,7 +33,7 @@ public class PlayerPawn {
 
     }
 
-    public void move(int direction) {
+    public void action(int direction) {
 
         int newX = x;
         int newY = y;

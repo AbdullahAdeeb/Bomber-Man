@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  *
  * @author zachcousins
  */
-public class Sender {
+class Sender {
     
     DatagramSocket sendSock;
 
