@@ -2,10 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package GameView;
+package bomberman;
 
-import java.awt.Color;
+import java.net.URL;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 /**
@@ -18,35 +21,76 @@ public class MapView extends javax.swing.JFrame {
      * Creates new form mapView
      */
     MapModel model;
-
-
+    private ImageIcon grassIcon;
+    private ImageIcon wallIcon;
+    private ImageIcon boxIcon;
+    private ImageIcon exitIcon;
+    
+    private URL GRASS_ICON_DIR = this.getClass().getClassLoader().getResource("res/PATH1.JPG");
+    private URL WALL_ICON_DIR = this.getClass().getClassLoader().getResource("res/WALL1.JPG");
+    private URL BOX_ICON_DIR = this.getClass().getClassLoader().getResource("res/BOX1.JPG");
+    private URL EXIT_ICON_DIR = this.getClass().getClassLoader().getResource("res/EXIT1.JPG");
 
     public MapView(MapModel model) {
         this.model = model;
         initComponents();
-        this.setTitle("BomberMan");
+        initImages();
+
+        MapTableModel mapTableModel = new MapTableModel();
+        mapTableModel.setColumnCount(10);
+        mapTableModel.setRowCount(10);
 
 
-
-
-        this.mapTable.setModel(this.model);
-        this.mapTable.setCellSelectionEnabled(false);
+        Entity[][] grid = model.getGrid();
+        for (int y = 0; y < model.getGridSize(); y++) {
+            for (int x = 0; x < model.getGridSize(); x++) {
+                switch (grid[x][y].getType()) {
+                    case Entity.BOX:
+                        mapTableModel.setValueAt(boxIcon, x, y);
+                        break;
+                    case Entity.WALL:
+                        mapTableModel.setValueAt(wallIcon, x, y);
+                        break;
+                    case Entity.PATH:
+                        mapTableModel.setValueAt(grassIcon, x, y);
+                        break;
+                    case Entity.EXIT:
+                        mapTableModel.setValueAt(exitIcon, x, y);
+                        break;
+                    default:
+                        mapTableModel.setValueAt(grassIcon, x, y);
+                        break;
+                }
+            }
+        }// done for loop
         this.mapTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        
-        
         TableColumnModel columnModel = this.mapTable.getColumnModel();
+
         for (int i = 0; i < columnModel.getColumnCount(); i++) {
-            columnModel.getColumn(i).sizeWidthToFit();
+//            columnModel.getColumn(i).sizeWidthToFit();
+            columnModel.setColumnSelectionAllowed(false);
+//            columnModel.getColumn(i).setWidth(40);
+//            mapTable.getColumnModel().getColumn(i).setWidth(40);
+//            columnModel.getColumn(i).setMinWidth(50);
+//            columnModel.getColumn(i).setMaxWidth(50);
         }
-        mapTable.setShowGrid(false);
-        this.mapPanel.setBackground(Color.BLUE);
-        this.mapTable.setPreferredScrollableViewportSize(this.mapTable.getSize());
-        this.mapPanel.setSize(this.mapTable.getSize());
+//        for (int i = 0; i < mapTableModel.getRowCount(); i++) {
+            mapTable.setRowHeight(50);
+            mapTable.setShowGrid(false);
+            
+//        }
+
+
+        this.mapTable.setModel(mapTableModel);
     }
-    
-    
 
-
+    private void initImages() {
+        grassIcon = new ImageIcon(GRASS_ICON_DIR);
+        wallIcon = new ImageIcon(WALL_ICON_DIR);
+        boxIcon = new ImageIcon(BOX_ICON_DIR);
+        exitIcon = new ImageIcon(EXIT_ICON_DIR);
+       
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -61,7 +105,6 @@ public class MapView extends javax.swing.JFrame {
 
         mapPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        mapTable.setBackground(new java.awt.Color(0, 0, 0));
         mapTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -73,13 +116,6 @@ public class MapView extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        mapTable.setEnabled(false);
-        mapTable.setMaximumSize(new java.awt.Dimension(600, 600));
-        mapTable.setMinimumSize(new java.awt.Dimension(0, 0));
-        mapTable.setPreferredSize(new java.awt.Dimension(600, 600));
-        mapTable.setRowHeight(60);
-        mapTable.setRowMargin(0);
-        mapTable.setTableHeader(null);
         jScrollPane1.setViewportView(mapTable);
 
         javax.swing.GroupLayout mapPanelLayout = new javax.swing.GroupLayout(mapPanel);
@@ -88,14 +124,14 @@ public class MapView extends javax.swing.JFrame {
             mapPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mapPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 610, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 769, Short.MAX_VALUE)
+                .addGap(16, 16, 16))
         );
         mapPanelLayout.setVerticalGroup(
             mapPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mapPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 610, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 634, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -133,4 +169,11 @@ public class MapView extends javax.swing.JFrame {
     private javax.swing.JTable mapTable;
     // End of variables declaration//GEN-END:variables
 
+    class MapTableModel extends DefaultTableModel {
+
+        @Override
+        public Class<?> getColumnClass(int i) {
+            return Icon.class;
+        }
+    }
 }

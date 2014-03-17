@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map dimension="10">
 	<row index="0">
-	<!-- b = box ; w = wall ; e = exit ; p = empty path--> 
+	<!-- b = box ; w = wall ; eb = exit behind box ; ep = exit behind path ; p = empty path--> 
 		p-b-w-b-b-p-p-w-p-p
 	</row>
 	<row index="1">
@@ -17,7 +17,7 @@
 		b-b-p-p-b-p-p-w-p-p
 	</row>
 	<row index="5">
-		p-b-b-p-b-b-p-p-e-w
+		p-b-b-p-b-b-p-p-eb-w
 	</row>
 	<row index="6">
 		w-w-p-p-p-w-p-p-w-b

@@ -22,11 +22,11 @@ class Sender {
         }
     }
     
-    public void sendCmd(DatagramPacket send){
+    public void sendCmd(DatagramPacket dp){
         
-        System.out.println("\nSending...\nPlayer: " + send.getData()[0] + "\tCMD: " + send.getData()[1]);
+        //System.out.println("\nSending...\nPlayer: " + dp.getData()[0] + "\tCMD: " + dp.getData()[1]);
         try {
-            sendSock.send(send);
+            sendSock.send(dp);
         } catch (IOException ex) {
             Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -34,6 +34,7 @@ class Sender {
     }
     
     public void close(){
+        sendSock.disconnect();
         sendSock.close();
     }
     

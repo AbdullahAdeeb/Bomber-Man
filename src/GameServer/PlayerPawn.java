@@ -5,6 +5,7 @@
 package GameServer;
 
 import GameView.MapModel;
+import java.util.TimerTask;
 
 /**
  *
@@ -16,7 +17,8 @@ public class PlayerPawn {
     public final static int FORWARD = 2;
     public final static int BACKWARD = 3;
     public final static int LEFT = 4;
-    public final static int DROP = 5;
+    public final static int BOMB = 5;
+    private int lifes = 1;
     private int x;
     private int y;
     private BombsFactory bombsFactory;
@@ -25,11 +27,15 @@ public class PlayerPawn {
 
     PlayerPawn(int id, MapModel mapModel) {
         this.id = id;
-        this.x = 0;
-        this.y = 0;
+
+
         this.bombsFactory = new BombsFactory();
+
         this.map = mapModel;
-        this.map.setPlayerOnEntity(x, y);
+        int[] pos = this.map.findPosForNewPlayer();
+        this.x = pos[0];
+        this.y = pos[1];
+        this.map.setPlayerOnEntity(id, x, y);
 
     }
 
@@ -37,7 +43,7 @@ public class PlayerPawn {
 
         int newX = x;
         int newY = y;
-               
+
         switch (direction) {
             case PlayerPawn.RIGHT:
                 if (x < this.map.getWidth() - 1 && this.map.isCellPath(x + 1, y)) {
@@ -63,14 +69,31 @@ public class PlayerPawn {
                     break;
                 }
                 return;
+            case PlayerPawn.BOMB:
+                System.out.println("BOMB RECEVED");
+                this.bombsFactory.dropBomb(new DetonationTask(this.x, this.y));
+                this.map.putBombOn(x, y);
+                return;
             default:
+                System.out.println("NOT IMPELMENTED COMMAND RECIEVED");
                 break;
 
         }
+
         this.map.setPlayerOffEntity(x, y);
-        this.map.setPlayerOnEntity(newX, newY);
+        if (this.map.isCellHavePawnOn(newX, newY)) {
+            this.lifes--; //player dies if collides with an enemy
+            newX = 0;
+            newY = 0;
+        } else {
+            this.map.setPlayerOnEntity(id, newX, newY);
+        }
         this.x = newX;
         this.y = newY;
+    }
+
+    public boolean isDead() {
+        return this.lifes == 0;
     }
 
     public int getX() {
@@ -84,4 +107,24 @@ public class PlayerPawn {
     public int getId() {
         return id;
     }
+
+    class DetonationTask extends TimerTask {
+
+        int x;
+        int y;
+
+        public DetonationTask(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public void run() {
+            // this is the timer that will run when the bomb explodes
+            int range = bombsFactory.detonateBomb();
+            map.setBombOff(this.x, this.y, range);
+            System.out.println("bomb EXploded");
+        }
+    }
+
 }

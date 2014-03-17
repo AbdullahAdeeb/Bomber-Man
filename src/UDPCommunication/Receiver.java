@@ -59,6 +59,7 @@ class Receiver implements Runnable{
     }
     
     public void close(){
+        recvSock.disconnect();
         recvSock.close();
     }
 }

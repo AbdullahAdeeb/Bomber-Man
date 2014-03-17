@@ -16,10 +16,12 @@ public class Entity {
     public static final int BOX = 222;
     public static final int PATH = 333;
     public static final int EXIT = 444;
+    public static final int BOMB = 555;
+    
     private boolean destructable;
-    private boolean path = false;
+    private boolean isPath = false;
     private int type;
-    private boolean isPlayerPawnOn = false;
+    private int PlayerPawnOn = -1;
     private ImageIcon icon;
 
     Entity(int type,ImageIcon icon) {
@@ -32,26 +34,42 @@ public class Entity {
                 this.destructable = true;
             case PATH:
                 this.destructable = false;
-                this.path = true;
+                this.isPath = true;
             case EXIT:
                 this.destructable = false;
+            case BOMB:
+                this.destructable = true;
         }
     }
 
     
-    public boolean isIsPlayerPawnOn() {
-        return isPlayerPawnOn;
+    public boolean isPawnOn() {
+        return PlayerPawnOn != -1;
     }
 
-    public void setIsPlayerPawnOn(boolean isPlayerPawnOn) {
-        this.isPlayerPawnOn = isPlayerPawnOn;
+    public void setPawnOn(int playerID) {
+        this.PlayerPawnOn = playerID;
+    }
+    
+    public int getPawn(){
+        return this.PlayerPawnOn;
     }
 
+    
+    public int getPlayerPawnOn() {
+        return PlayerPawnOn;
+    }
+
+    
     public ImageIcon getIcon() {
         return icon;
     }
 
     public int getType() {
         return type;
+    }
+
+    void setEnemyPawnOn(int id) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

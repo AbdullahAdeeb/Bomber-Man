@@ -4,7 +4,6 @@
  */
 package GameView;
 
-import GameServer.PlayerPawn;
 import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
@@ -30,20 +29,26 @@ public class MapModel extends DefaultTableModel {
     private URL WALL_ICON_DIR = this.getClass().getClassLoader().getResource("res/WALL1.JPG");
     private URL BOX_ICON_DIR = this.getClass().getClassLoader().getResource("res/BOX1.JPG");
     private URL EXIT_ICON_DIR = this.getClass().getClassLoader().getResource("res/EXIT1.JPG");
-    private URL FACE_ICON_DIR = this.getClass().getClassLoader().getResource("res/FACE1.JPG");
-    private ImageIcon grassIcon;
+    private URL BOMB_ICON_DIR = this.getClass().getClassLoader().getResource("res/BOMB1.JPG");
+    private URL ENEMY_ICON_DIR = this.getClass().getClassLoader().getResource("res/ENEMY1.JPG");
+    private URL PLAYER_ICON_DIR = this.getClass().getClassLoader().getResource("res/PLAYER1.PNG");
+    private ImageIcon pathIcon;
     private ImageIcon wallIcon;
     private ImageIcon boxIcon;
     private ImageIcon exitIcon;
-    private ImageIcon faceIcon;
+    private ImageIcon playerIcon;
     MapView viewer;
+    boolean isExitHidden = true;
     int width = 10;
     int height = 10;
     Entity mapGrid[][];
     boolean isExitSet = false;
+    private ImageIcon enemyIcon;
+    private ImageIcon bombIcon;
 
     public MapModel(String mapFilePath) {
         initImages();
+
         if (mapFilePath == null) {
             generateRandomMap();
         } else {
@@ -93,8 +98,10 @@ public class MapModel extends DefaultTableModel {
                         putBoxIn(x, y);
                     } else if (cells[y].equals("w")) {   // 20% of map is boxes
                         putWallIn(x, y);
-                    } else if (cells[y].equals("e")) {   // 20% of map is boxes
-                        putExitIn(x, y);
+                    } else if (cells[y].equals("eb")) {   // 20% of map is boxes
+                        hideExitIn(x, y, boxIcon);
+                    } else if (cells[y].equals("ep")) {   // 20% of map is boxes
+                        hideExitIn(x, y, pathIcon);
                     } else if (cells[y].equals("p")) {   // 20% of map is boxes
                         putPathIn(x, y);
                     } else {
@@ -121,7 +128,7 @@ public class MapModel extends DefaultTableModel {
                     putBoxIn(x, y);
                 } else if (rand >= 50 && rand <= 100) {  // 50% of the map will be path
                     putPathIn(x, y);
-                    putExitIn(x, y);  // only one door will be created at a path 
+                    hideExitIn(x, y, pathIcon);  // only one door will be created at a path 
                 } else {
                     putPathIn(x, y);
                 }
@@ -129,9 +136,6 @@ public class MapModel extends DefaultTableModel {
         }
 
 
-    }
-
-    public void addPawn(PlayerPawn p) {
     }
 
     public Entity[][] getGrid() {
@@ -146,49 +150,84 @@ public class MapModel extends DefaultTableModel {
         this.viewer = v;
     }
 
+    public void placeBomb(int x, int y) {
+        this.mapGrid[x][x] = new Entity(Entity.BOMB, this.bombIcon);
+        setValueAt(this.bombIcon, y, x);
+    }
+
     private void putWallIn(int x, int y) {
-        this.mapGrid[x][y] = new Entity(Entity.WALL,this.wallIcon);
+        this.mapGrid[x][y] = new Entity(Entity.WALL, this.wallIcon);
         setValueAt(this.wallIcon, y, x);
     }
 
     private void putBoxIn(int x, int y) {
-        this.mapGrid[x][y] = new Entity(Entity.BOX,this.boxIcon);
+        this.mapGrid[x][y] = new Entity(Entity.BOX, this.boxIcon);
         setValueAt(this.boxIcon, y, x);
     }
 
     private void putPathIn(int x, int y) {
-        this.mapGrid[x][y] = new Entity(Entity.PATH,this.grassIcon);
-        setValueAt(this.grassIcon, y, x);
+        this.mapGrid[x][y] = new Entity(Entity.PATH, this.pathIcon);
+        setValueAt(this.pathIcon, y, x);
     }
 
-    private void putExitIn(int x, int y) {
+    private void hideExitIn(int x, int y, ImageIcon icon) {
         if (!isExitSet) {
             isExitSet = true;
-            this.mapGrid[x][y] = new Entity(Entity.EXIT,this.exitIcon);
-            setValueAt(this.exitIcon, y, x);
+            this.mapGrid[x][y] = new Entity(Entity.EXIT, icon); //create and exit entity
+            // hide the entity by displaying the path icon
+            setValueAt(exitIcon, y, x);
         } else {
             putBoxIn(x, y);
-            setValueAt(this.boxIcon, y, x);
         }
     }
 
+    public void putBombOn(int x, int y) {
+        this.mapGrid[x][y] = new Entity(Entity.BOMB, bombIcon);
+        setValueAt(bombIcon, y, x);
+    }
+
+    public boolean isCellHavePawnOn(int x, int y) {
+        return this.mapGrid[x][y].isPawnOn();
+    }
+
     public boolean isCellPath(int x, int y) {
-        System.out.println(this.mapGrid[x][y].getType() == Entity.PATH);
         return this.mapGrid[x][y].getType() == Entity.PATH;
     }
 
-    public void setPlayerOnEntity(int x, int y) {
-        System.out.println("player on entity "+x+"><"+y);
-        this.mapGrid[x][y].setIsPlayerPawnOn(true);
-        setValueAt(faceIcon, y, x);
+    public void setPlayerOnEntity(int id, int x, int y) {
+        System.out.println("player on entity " + x + "><" + y);
+        this.mapGrid[x][y].setPawnOn(id);
+        setValueAt(playerIcon, y, x);
+    }
+
+    public int[] findPosForNewPlayer() {
+        //TODO make sure to handle when the map is full and there is no space for new players
+        // maybe place then on a waiting queue but will still need to listen for other players because this will pause.
+        System.out.println("Finding a place for a new player...");
+        int loc[] = new int[2];
+        boolean done = false;
+        do {
+            int xrand = (int) (Math.random() * width);
+            int yrand = (int) (Math.random() * height);
+            if (isCellPath(xrand, yrand) && !isCellHavePawnOn(xrand, yrand)) {
+                loc[0] = xrand;
+                loc[1] = yrand;
+                done = true;
+            }
+        } while (!done);
+        return loc;
     }
 
     public void setPlayerOffEntity(int x, int y) {
-        this.mapGrid[x][y].setIsPlayerPawnOn(false);
-        setValueAt(this.mapGrid[x][y].getIcon(), y, x);
+        this.mapGrid[x][y].setPawnOn(-1);
+        if (this.mapGrid[x][y].getType() == Entity.EXIT) {
+            setValueAt(exitIcon, y, x);
+            this.isExitHidden = false;
+        } else {
+            setValueAt(this.mapGrid[x][y].getIcon(), y, x);
+        }
     }
 
-    
     public int getWidth() {
         return width;
     }
@@ -198,15 +237,95 @@ public class MapModel extends DefaultTableModel {
     }
 
     private void initImages() {
-        grassIcon = new ImageIcon(GRASS_ICON_DIR);
+        pathIcon = new ImageIcon(GRASS_ICON_DIR);
         wallIcon = new ImageIcon(WALL_ICON_DIR);
         boxIcon = new ImageIcon(BOX_ICON_DIR);
         exitIcon = new ImageIcon(EXIT_ICON_DIR);
-        faceIcon = new ImageIcon(FACE_ICON_DIR);
+        playerIcon = new ImageIcon(PLAYER_ICON_DIR);
+        enemyIcon = new ImageIcon(ENEMY_ICON_DIR);
+        bombIcon = new ImageIcon(BOMB_ICON_DIR);
     }
 
+    public String serialize() {
+        String str = "";
+        for (int i = 0; i < this.mapGrid.length; i++) {
+            for (int j = 0; j < this.mapGrid[0].length; j++) {
+                if (mapGrid[i][j].isPawnOn()) { // set the id if there is pawn on the cell
+
+                    str = str + "-" + mapGrid[i][j].getPlayerPawnOn();
+                } else { // otherwise no player is on the entity and send the entity
+                    // if the entity is an exit and it's hidden then will need to send the hiding object
+                    if (mapGrid[i][j].getType() == Entity.EXIT && isExitHidden) {
+                        if (mapGrid[i][j].getIcon() == boxIcon) {
+                            str = str + "-" + Entity.BOX;
+                        } else {
+                            str = str + "-" + Entity.PATH;
+                        }
+                    } else { // put a normal entity with no player on and no hiddent exit
+                        str = str + "-" + String.valueOf(mapGrid[i][j].getType());
+                    }
+
+
+                }
+            }
+        }
+        return str;
+    }
+
+// not needed in the server, needed in the player
+//    public void parseString(String ser) {
+//        String[] split = ser.split("-");
+//        int colCount = 0;
+//        int rowSize = this.mapGrid.length;
+//        for (int i = 0; i < split.length; i++) {
+//            if (colCount < this.mapGrid[0].length) {
+//                switch (Integer.getInteger(split[colCount])) {
+//                    case Entity.BOX:
+//                        putBoxIn(i, colCount);
+//                        break;
+//                    case Entity.EXIT:
+//                        hideExitIn(i, colCount);
+//                        break;
+//                    case Entity.PATH:
+//                        putPathIn(i, colCount);
+//                        break;
+//                    case Entity.WALL:
+//                        putWallIn(i, colCount);
+//                        break;
+//                    default:
+//                        setPlayerOnEntity(Integer.getInteger(split[colCount]), i, colCount);
+//                }
+//                colCount++;
+//            } else {
+//                colCount = 0;
+//            }
+//
+//        }
+//
+//    }
     @Override
     public Class<?> getColumnClass(int i) {
         return Icon.class;
+    }
+
+    public void setBombOff(int x, int y, int range) {
+        try {
+            changeToPath(x, y);
+            changeToPath(x + 1, y);
+            changeToPath(x - 1, y);
+            changeToPath(x, y - 1);
+            changeToPath(x, y + 1);
+        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+            // there is explosion outside the map because range is outside the border
+        }
+        
+    }
+
+    private void changeToPath(int x, int y) {
+        
+        if (this.mapGrid[x][y].getType() != Entity.WALL ) {
+            putPathIn(x, y);
+        }
+        // TODO might wanna check if the player is there and kill it
     }
 }

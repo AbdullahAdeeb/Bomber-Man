@@ -10,7 +10,6 @@ import UDPCommunication.Connection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 /**
  *
@@ -26,7 +25,6 @@ public class Game {
     Game(String mapFilePath) {
         this.mapModel = new MapModel(mapFilePath);
         playerPawns = new ArrayList();
-
         com = new Connection(new IncomingActionListener());
 
     }
@@ -40,28 +38,42 @@ public class Game {
             int id = Character.getNumericValue(actionCmd.charAt(0));
             int cmd = Character.getNumericValue(actionCmd.charAt(1)); //get the command
 
+
             if (id < 0) { // add a new player .. when id is less than zero means id is not yet assigned
                 PlayerPawn p = new PlayerPawn(playerPawns.size(), mapModel);
                 playerPawns.add(p);
-                System.out.println("--RECEIVED CMD--\nNew Player: " + p.getId() + "\n");
-                com.sendID(p.getId());
-
+                System.out.println("\n--RECEIVED CMD--\nNew Player: " + p.getId() + "\n");
+                com.sendID(String.valueOf(p.getId()));
+                id = p.getId();
             } else if (cmd == 6) { // disconnect command
                 playerPawns.remove(id);
-                System.out.println("--RECEIVED CMD--\nPlayer Left: " + id + "\n");
+                System.out.println("\n--RECEIVED CMD--\nPlayer Left: " + id + "\n");
             } else if (cmd == 7) { // list current players
                 System.out.println(playerPawns.toArray());
+            } else if (cmd == 5) {
+                playerPawns.get(id).action(cmd);
             } else {
                 if (id >= playerPawns.size()) {
                     // TODO log it using logger
-                    System.out.println("OHH SHITTTT");
+                    System.out.println("ID Error: " + id);
                     return;
                 }
                 playerPawns.get(id).action(cmd);
-                System.out.println("--RECEIVED CMD--\nPlayer: " + id + "\tCMD>>" + cmd);
+                System.out.println("\n--RECEIVED CMD--\nPlayer: " + id + "\tCMD: " + cmd);
             }
-            com.send(id, 1);  // send ACK
+            com.send(id, 1, "8");  // send ACK
+            updateAllPlayers();
         }
+
+        public void updateAllPlayers() {
+            System.out.println("updating all players >>>");
+            String serialize = mapModel.serialize();
+            for (int i = 0; i < playerPawns.size(); i++) {
+                com.send(playerPawns.get(i).getId(), 5, serialize);
+            }
+        }
+
+    
     }
 
     public static void main(String[] args) {
@@ -72,32 +84,6 @@ public class Game {
             game = new Game(null);
         }
 
-
-    }
-
-    private void testPlayer() {
-        this.playerPawns.add(new PlayerPawn(212, this.mapModel));
-
-        PlayerPawn p = this.playerPawns.get(0);
-        while (true) {
-            Scanner scan = new Scanner(System.in);
-            String text = scan.nextLine();
-            if (text.equals("w")) {
-                System.out.println("f");
-                p.action(PlayerPawn.FORWARD);
-            } else if (text.equals("s")) {
-                System.out.println("back");
-                p.action(PlayerPawn.BACKWARD);
-            } else if (text.equals("a")) {
-                System.out.println("left");
-                p.action(PlayerPawn.LEFT);
-            } else if (text.equals("d")) {
-                System.out.println("right");
-                p.action(PlayerPawn.RIGHT);
-            } else {
-                System.out.println("not implemented");
-            }
-        }
 
     }
 }
