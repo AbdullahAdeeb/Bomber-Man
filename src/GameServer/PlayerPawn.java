@@ -25,7 +25,7 @@ public class PlayerPawn {
     private int id;
     private MapModel map;
 
-    PlayerPawn(int id, MapModel mapModel) {
+    public PlayerPawn(int id, MapModel mapModel) {
         this.id = id;
 
 

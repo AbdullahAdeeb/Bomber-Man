@@ -25,7 +25,7 @@ public class Game {
     Connection com;
     Timer timer;
 
-    Game(String mapFilePath) {
+    public Game(String mapFilePath) {
         timer = new Timer();
         this.mapModel = new MapModel(mapFilePath);
         playerPawns = new ArrayList();
@@ -94,6 +94,15 @@ public class Game {
         }
     }
 
+    public ArrayList<PlayerPawn> getPlayerPawns() {
+        return playerPawns;
+    }
+
+    public MapModel getMapModel() {
+        return mapModel;
+    }
+
+    
     public static void main(String[] args) {
         Game game;
         if (args.length > 0) {

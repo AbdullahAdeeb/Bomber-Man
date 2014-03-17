@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map dimension="10">
+	<row index="0">
+	<!-- b = box ; w = wall ; eb = exit behind box ; ep = exit behind path ; p = empty path--> 
+		p-b-w-b-b-p-p-w-p-p
+	</row>
+	<row index="1">
+		p-b-w-b-b-p-p-w-w-b
+	</row>
+	<row index="2">
+		p-p-p-b-b-p-p-w-b-w
+	</row>
+	<row index="3">
+		b-b-p-b-b-p-p-w-p-p
+	</row>
+	<row index="4">
+		b-b-p-p-b-p-p-w-p-p
+	</row>
+	<row index="5">
+		p-b-b-p-b-b-p-p-eb-w
+	</row>
+	<row index="6">
+		w-w-p-p-p-w-p-p-w-b
+	</row>
+	<row index="7">
+		w-w-p-p-w-b-b-p-b-w
+	</row>
+	<row index="8">
+		w-w-p-p-b-b-w-b-p-p
+	</row>
+	<row index="9">
+		b-b-w-b-b-p-p-w-p-p
+	</row>
+</map>
