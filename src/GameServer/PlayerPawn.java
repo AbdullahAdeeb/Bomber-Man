@@ -123,7 +123,7 @@ public class PlayerPawn {
             // this is the timer that will run when the bomb explodes
             int range = bombsFactory.detonateBomb();
             map.setBombOff(this.x, this.y, range);
-            System.out.println("bomb EXploded");
+            System.out.println("bomb Exploded");
         }
     }
 

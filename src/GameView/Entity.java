@@ -23,6 +23,12 @@ public class Entity {
     private int type;
     private int PlayerPawnOn = -1;
     private ImageIcon icon;
+    
+    public boolean setType(int newType,ImageIcon newIcon){
+    	this.type = newType;
+    	this.icon = newIcon;
+    	return true;
+    }
 
     Entity(int type,ImageIcon icon) {
         this.type = type;

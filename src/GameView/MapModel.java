@@ -45,6 +45,10 @@ public class MapModel extends DefaultTableModel {
     boolean isExitSet = false;
     private ImageIcon enemyIcon;
     private ImageIcon bombIcon;
+    int doorX=0;
+    int doorY=0;
+    boolean doorHidden = true;
+    
 
     public MapModel(String mapFilePath) {
         initImages();
@@ -86,32 +90,40 @@ public class MapModel extends DefaultTableModel {
         width = size;
         setColumnCount(width);
         setRowCount(height);
-
-        int x = 0;
-        for (int i = 0; i < rows.getLength(); i++) {
-            Node row = rows.item(i);
-            if (row.getNodeName().equals("row")) {
-                String[] cells = row.getTextContent().trim().split("-");
-                for (int y = 0; y < size; y++) {
-
-                    if (cells[y].equals("b")) {
+        
+        int j=0;
+        int i =0;
+        
+        
+        for (int y=0;y<height;y++){
+        	Node row = rows.item(j);
+        	String[] cells = row.getTextContent().trim().split("-");
+        	if (row.getNodeName().equals("row")) {
+        		for (int x=0;x<width;x++){
+        			if (cells[x].equals("b")) {
                         putBoxIn(x, y);
-                    } else if (cells[y].equals("w")) {   // 20% of map is boxes
+                    } else if (cells[x].equals("w")) {   // 20% of map is boxes
                         putWallIn(x, y);
-                    } else if (cells[y].equals("eb")) {   // 20% of map is boxes
+                    } else if (cells[x].equals("eb")) {   // 20% of map is boxes
                         hideExitIn(x, y, boxIcon);
-                    } else if (cells[y].equals("ep")) {   // 20% of map is boxes
+                    } else if (cells[x].equals("ep")) {   // 20% of map is boxes
                         hideExitIn(x, y, pathIcon);
-                    } else if (cells[y].equals("p")) {   // 20% of map is boxes
+                    } else if (cells[x].equals("p")) {   // 20% of map is boxes
                         putPathIn(x, y);
                     } else {
                         // TODO investigate wether fall back to a wall or a box or should throw an error 
                     }
-                }
-                x++;
-            }
-
+        		}
+    			
+    			
+        	}else{
+        		y--;
+        		
+        	}
+        	j++;
+        	
         }
+       
     }
 
     private void generateRandomMap() {
@@ -176,6 +188,8 @@ public class MapModel extends DefaultTableModel {
             this.mapGrid[x][y] = new Entity(Entity.EXIT, icon); //create and exit entity
             // hide the entity by displaying the path icon
             setValueAt(exitIcon, y, x);
+            doorX =x;
+            doorY=y;
         } else {
             putBoxIn(x, y);
         }
@@ -255,7 +269,7 @@ public class MapModel extends DefaultTableModel {
                     str = str + "-" + mapGrid[i][j].getPlayerPawnOn();
                 } else { // otherwise no player is on the entity and send the entity
                     // if the entity is an exit and it's hidden then will need to send the hiding object
-                    if (mapGrid[i][j].getType() == Entity.EXIT && isExitHidden) {
+                    if (mapGrid[i][j].getType() == Entity.EXIT && this.doorHidden) {
                         if (mapGrid[i][j].getIcon() == boxIcon) {
                             str = str + "-" + Entity.BOX;
                         } else {
@@ -311,20 +325,47 @@ public class MapModel extends DefaultTableModel {
     public void setBombOff(int x, int y, int range) {
         try {
             changeToPath(x, y);
+        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+            // there is explosion outside the map because range is outside the border
+        }
+        try {
             changeToPath(x + 1, y);
+        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+            // there is explosion outside the map because range is outside the border
+        }
+
+        try {
             changeToPath(x - 1, y);
+        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+            // there is explosion outside the map because range is outside the border
+        }
+        try {
             changeToPath(x, y - 1);
+        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+            // there is explosion outside the map because range is outside the border
+        }
+        try {
             changeToPath(x, y + 1);
         } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
             // there is explosion outside the map because range is outside the border
         }
-        
+
+
     }
 
     private void changeToPath(int x, int y) {
-        
-        if (this.mapGrid[x][y].getType() != Entity.WALL ) {
+
+        if (this.mapGrid[x][y].getType() != Entity.WALL && this.isCellHavePawnOn(x, y)==false) {
             putPathIn(x, y);
+        }
+        
+        //Checks to see if the position blown up is that of the door
+        if (x == doorX && y == doorY){
+        	//setValueAt(exitIcon, y, x);
+        	doorHidden = false;
+        	this.mapGrid[x][y] = new Entity(Entity.EXIT, this.exitIcon);
+            setValueAt(this.exitIcon, y, x);
+        	//this.mapGrid[x][y].getType()
         }
         // TODO might wanna check if the player is there and kill it
     }
