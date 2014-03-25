@@ -5,6 +5,8 @@
 package GameView;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+
 import javax.swing.JTable;
 import javax.swing.table.TableColumnModel;
 
@@ -19,7 +21,7 @@ public class MapView extends javax.swing.JFrame {
      */
     MapModel model;
 
-
+    	
 
     public MapView(MapModel model) {
         this.model = model;

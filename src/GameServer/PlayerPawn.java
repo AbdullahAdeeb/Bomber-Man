@@ -24,10 +24,14 @@ public class PlayerPawn {
     private BombsFactory bombsFactory;
     private int id;
     private MapModel map;
+    private boolean isDead;
+    private int bombAllowance;
+    private int currentBombs;
 
     public PlayerPawn(int id, MapModel mapModel) {
         this.id = id;
-
+        bombAllowance = 1;
+        currentBombs = 0;
 
         this.bombsFactory = new BombsFactory();
 
@@ -36,6 +40,7 @@ public class PlayerPawn {
         this.x = pos[0];
         this.y = pos[1];
         this.map.setPlayerOnEntity(id, x, y);
+        isDead=false;
 
     }
 
@@ -71,8 +76,14 @@ public class PlayerPawn {
                 return;
             case PlayerPawn.BOMB:
                 System.out.println("BOMB RECEVED");
-                this.bombsFactory.dropBomb(new DetonationTask(this.x, this.y));
-                this.map.putBombOn(x, y);
+                
+                //Only allow bombs to be dropped if you haven't reached the limit
+                if (!(currentBombs>=bombAllowance)){
+                	currentBombs++;
+                	this.bombsFactory.dropBomb(new DetonationTask(this.x, this.y,this));
+                    this.map.putBombOn(x, y);
+                }
+                
                 return;
             default:
                 System.out.println("NOT IMPELMENTED COMMAND RECIEVED");
@@ -81,19 +92,39 @@ public class PlayerPawn {
         }
 
         this.map.setPlayerOffEntity(x, y);
+        /**
         if (this.map.isCellHavePawnOn(newX, newY)) {
+        	this.setDeath();
             this.lifes--; //player dies if collides with an enemy
-            newX = 0;
-            newY = 0;
+            //newX = 0;
+            //newY = 0;
         } else {
-            this.map.setPlayerOnEntity(id, newX, newY);
+        	//Only sets them there if the player is not dead
+        	if (!this.isDead){
+        		this.map.setPlayerOnEntity(id, newX, newY);
+        	}
+            
         }
+        **/
+        
+        if (!this.isDead){
+    		this.map.setPlayerOnEntity(id, newX, newY);
+    	}
         this.x = newX;
         this.y = newY;
     }
 
     public boolean isDead() {
-        return this.lifes == 0;
+        return isDead;
+    }
+    
+    public void setDeath(){
+    	this.map.setPlayerOffEntity(x, y);
+    	isDead = true;
+    	
+    	//This is done so they don't remain on the board after death
+    	//x = -1;
+    	//y = -1;
     }
 
     public int getX() {
@@ -103,19 +134,38 @@ public class PlayerPawn {
     public int getY() {
         return y;
     }
+    
+    public void setX(int newX){
+    	x = newX;
+    }
+    
+    public void setY(int newY){
+    	y = newY;
+    }
 
     public int getId() {
         return id;
+    }
+    
+    public boolean checkPlayerCollision(PlayerPawn other){
+    	
+    	if (this.x == other.getX() && this.y == other.getY() && this.id != other.id && !this.isDead() && !other.isDead()){
+    		return true;
+    	}
+    	
+    	return false;
     }
 
     class DetonationTask extends TimerTask {
 
         int x;
         int y;
+        PlayerPawn owner;
 
-        public DetonationTask(int x, int y) {
+        public DetonationTask(int x, int y,PlayerPawn own) {
             this.x = x;
             this.y = y;
+            this.owner = own;
         }
 
         @Override
@@ -124,6 +174,8 @@ public class PlayerPawn {
             int range = bombsFactory.detonateBomb();
             map.setBombOff(this.x, this.y, range);
             System.out.println("bomb Exploded");
+            owner.currentBombs--;
+            
         }
     }
 

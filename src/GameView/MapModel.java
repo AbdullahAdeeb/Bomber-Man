@@ -6,10 +6,12 @@ package GameView;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -48,11 +50,14 @@ public class MapModel extends DefaultTableModel {
     int doorX=0;
     int doorY=0;
     boolean doorHidden = true;
+    public ArrayList<Integer> explosionDeaths;
     
 
     public MapModel(String mapFilePath) {
         initImages();
 
+        explosionDeaths = new ArrayList<Integer>();
+        
         if (mapFilePath == null) {
             generateRandomMap();
         } else {
@@ -65,9 +70,12 @@ public class MapModel extends DefaultTableModel {
         startMapView();
     }
 
+    
+    
     private void startMapView() {
         try {
             viewer = new MapView(this);
+            
             viewer.setVisible(true);
         } catch (Exception ex) {
             Logger.getLogger(MapModel.class.getName()).log(Level.SEVERE, null, ex);
@@ -269,7 +277,7 @@ public class MapModel extends DefaultTableModel {
                     str = str + "-" + mapGrid[i][j].getPlayerPawnOn();
                 } else { // otherwise no player is on the entity and send the entity
                     // if the entity is an exit and it's hidden then will need to send the hiding object
-                    if (mapGrid[i][j].getType() == Entity.EXIT && this.doorHidden) {
+                    if (mapGrid[i][j].getType() == Entity.EXIT && this.isExitHidden) {
                         if (mapGrid[i][j].getIcon() == boxIcon) {
                             str = str + "-" + Entity.BOX;
                         } else {
@@ -323,32 +331,40 @@ public class MapModel extends DefaultTableModel {
     }
 
     public void setBombOff(int x, int y, int range) {
-        try {
-            changeToPath(x, y);
-        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
-            // there is explosion outside the map because range is outside the border
-        }
-        try {
-            changeToPath(x + 1, y);
-        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
-            // there is explosion outside the map because range is outside the border
-        }
-
-        try {
-            changeToPath(x - 1, y);
-        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
-            // there is explosion outside the map because range is outside the border
-        }
-        try {
-            changeToPath(x, y - 1);
-        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
-            // there is explosion outside the map because range is outside the border
-        }
-        try {
-            changeToPath(x, y + 1);
-        } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
-            // there is explosion outside the map because range is outside the border
-        }
+    	
+    	int i=0;
+  
+    	//This is for destroying blocks within the range passed in, starts at 1 since 
+    	//otherwise first loop will all break the exact same block you start on
+    	for (i=1;i<range+1;i++){
+    		try {
+                changeToPath(x, y);
+            } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+                // there is explosion outside the map because range is outside the border
+            }
+    		try {
+                changeToPath(x + i, y);
+            } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+                // there is explosion outside the map because range is outside the border
+            }
+    		
+    		try {
+                changeToPath(x - i, y);
+            } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+                // there is explosion outside the map because range is outside the border
+            }
+    		
+    		try {
+                changeToPath(x, y - i);
+            } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+                // there is explosion outside the map because range is outside the border
+            }
+            try {
+                changeToPath(x, y + i);
+            } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
+                // there is explosion outside the map because range is outside the border
+            }
+    	}
 
 
     }
@@ -359,14 +375,23 @@ public class MapModel extends DefaultTableModel {
             putPathIn(x, y);
         }
         
+        //Checks to see if a player is in the explosion range
+        if (this.mapGrid[x][y].isPawnOn()){
+        	int id = this.mapGrid[x][y].getPawn();
+        	explosionDeaths.add(id);
+        	
+        }
+        
+        
         //Checks to see if the position blown up is that of the door
         if (x == doorX && y == doorY){
         	//setValueAt(exitIcon, y, x);
-        	doorHidden = false;
+        	this.isExitHidden = false;
         	this.mapGrid[x][y] = new Entity(Entity.EXIT, this.exitIcon);
             setValueAt(this.exitIcon, y, x);
         	//this.mapGrid[x][y].getType()
         }
+        
         // TODO might wanna check if the player is there and kill it
     }
 }

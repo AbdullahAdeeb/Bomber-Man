@@ -29,7 +29,6 @@ public class Game {
     ArrayList<PlayerPawn> playerPawns;
     Connection com;
     Timer timer;
-    //ArrayList<ActionEvent> commandsQ;
     BlockingQueue<ActionEvent> commandsQ;
 
     public Game(String mapFilePath) {
@@ -40,11 +39,18 @@ public class Game {
         playerPawns = new ArrayList();
         com = new Connection(new IncomingActionListener());
 
-        long updateX = 1000;
-        long updateY = 1000;
+        long updateX = 100;
+        long updateY = 100;
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+            	try{
+            		checkInteractions();
+            	}catch(Exception e){
+            		
+            	}
+            	//checkInteractions();
+            	
                 updateAllPlayers();
             }
         }, updateX, updateY);
@@ -93,7 +99,13 @@ public class Game {
             } else if (cmd == 7) { // list current players
                 System.out.println(playerPawns.toArray());
             } else if (cmd == 5) { //do an action with the player
-                playerPawns.get(id).action(cmd);
+            	if (playerPawns.get(id).isDead()){
+            		System.out.println("Player: " + id + "is dead, command dropped");
+            	}else{
+            		playerPawns.get(id).action(cmd);
+            		
+            	}
+                
             } else {
                 if (id >= playerPawns.size()) {
                     // TODO log it using logger
@@ -104,8 +116,44 @@ public class Game {
                 System.out.println("\n--RECEIVED CMD--\nPlayer: " + id + "\tCMD: " + cmd);
             }
             com.send(id, 1, "8");  // send ACK
+            
+            //Currently there's an issue where if you move over to where someone died, you also die
+            //this is due to the players x and y remaining on the board even after death, need to
+            //change these to something like -1,-1, but this causes out of bounds errors
+            
+            
+            //Code that checks for AI, player, interactions
+            checkInteractions();
+            
             updateAllPlayers();
         }
+    }
+    
+  //Code that checks for AI, player, interactions
+    public void checkInteractions(){
+    	
+    	 synchronized (playerPawns) {
+	    	//Code that checks for AI, player, interactions
+	        PlayerPawn previousPlayer = playerPawns.get(0);
+	        for (PlayerPawn v : playerPawns){
+	        	
+	        	//Checks to see if the two players have collided, if so, they both die
+	        	if (v.checkPlayerCollision(previousPlayer)){
+	        		v.setDeath();
+	        		previousPlayer.setDeath();
+	        		
+	        	}
+	        	previousPlayer = v;
+	        }
+	        
+	        //Checks to see if any players died from explosions
+	        for (Integer v : mapModel.explosionDeaths){
+	        	playerPawns.get(v).setDeath();
+	        }
+	        //Clears the list of deaths since they've been checked
+	        mapModel.explosionDeaths.clear();
+    	 }
+    	
     }
 
     class IncomingActionListener implements ActionListener {
