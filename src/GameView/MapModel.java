@@ -294,37 +294,6 @@ public class MapModel extends DefaultTableModel {
         return str;
     }
 
-// not needed in the server, needed in the player
-//    public void parseString(String ser) {
-//        String[] split = ser.split("-");
-//        int colCount = 0;
-//        int rowSize = this.mapGrid.length;
-//        for (int i = 0; i < split.length; i++) {
-//            if (colCount < this.mapGrid[0].length) {
-//                switch (Integer.getInteger(split[colCount])) {
-//                    case Entity.BOX:
-//                        putBoxIn(i, colCount);
-//                        break;
-//                    case Entity.EXIT:
-//                        hideExitIn(i, colCount);
-//                        break;
-//                    case Entity.PATH:
-//                        putPathIn(i, colCount);
-//                        break;
-//                    case Entity.WALL:
-//                        putWallIn(i, colCount);
-//                        break;
-//                    default:
-//                        setPlayerOnEntity(Integer.getInteger(split[colCount]), i, colCount);
-//                }
-//                colCount++;
-//            } else {
-//                colCount = 0;
-//            }
-//
-//        }
-//
-//    }
     @Override
     public Class<?> getColumnClass(int i) {
         return Icon.class;
@@ -392,6 +361,5 @@ public class MapModel extends DefaultTableModel {
         	//this.mapGrid[x][y].getType()
         }
         
-        // TODO might wanna check if the player is there and kill it
     }
 }
