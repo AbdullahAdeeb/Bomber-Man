@@ -47,17 +47,16 @@ public class MapModel extends DefaultTableModel {
     boolean isExitSet = false;
     private ImageIcon enemyIcon;
     private ImageIcon bombIcon;
-    int doorX=0;
-    int doorY=0;
+    int doorX = 0;
+    int doorY = 0;
     boolean doorHidden = true;
     public ArrayList<Integer> explosionDeaths;
-    
 
     public MapModel(String mapFilePath) {
         initImages();
 
         explosionDeaths = new ArrayList<Integer>();
-        
+
         if (mapFilePath == null) {
             generateRandomMap();
         } else {
@@ -70,12 +69,10 @@ public class MapModel extends DefaultTableModel {
         startMapView();
     }
 
-    
-    
     private void startMapView() {
         try {
             viewer = new MapView(this);
-            
+
             viewer.setVisible(true);
         } catch (Exception ex) {
             Logger.getLogger(MapModel.class.getName()).log(Level.SEVERE, null, ex);
@@ -98,17 +95,17 @@ public class MapModel extends DefaultTableModel {
         width = size;
         setColumnCount(width);
         setRowCount(height);
-        
-        int j=0;
-        int i =0;
-        
-        
-        for (int y=0;y<height;y++){
-        	Node row = rows.item(j);
-        	String[] cells = row.getTextContent().trim().split("-");
-        	if (row.getNodeName().equals("row")) {
-        		for (int x=0;x<width;x++){
-        			if (cells[x].equals("b")) {
+
+        int j = 0;
+        int i = 0;
+
+
+        for (int y = 0; y < height; y++) {
+            Node row = rows.item(j);
+            String[] cells = row.getTextContent().trim().split("-");
+            if (row.getNodeName().equals("row")) {
+                for (int x = 0; x < width; x++) {
+                    if (cells[x].equals("b")) {
                         putBoxIn(x, y);
                     } else if (cells[x].equals("w")) {   // 20% of map is boxes
                         putWallIn(x, y);
@@ -121,17 +118,17 @@ public class MapModel extends DefaultTableModel {
                     } else {
                         // TODO investigate wether fall back to a wall or a box or should throw an error 
                     }
-        		}
-    			
-    			
-        	}else{
-        		y--;
-        		
-        	}
-        	j++;
-        	
+                }
+
+
+            } else {
+                y--;
+
+            }
+            j++;
+
         }
-       
+
     }
 
     private void generateRandomMap() {
@@ -144,9 +141,9 @@ public class MapModel extends DefaultTableModel {
 
                 if (rand < 15) {             //15% of map is walls
                     putWallIn(x, y);
-                } else if (rand >= 15 && rand < 50) {   // 20% of map is boxes
+                } else if (rand >= 15 && rand < 35) {   // 20% of map is boxes
                     putBoxIn(x, y);
-                } else if (rand >= 50 && rand <= 100) {  // 50% of the map will be path
+                } else if (rand >=35 && rand <= 100) {  // 65% of the map will be path
                     putPathIn(x, y);
                     hideExitIn(x, y, pathIcon);  // only one door will be created at a path 
                 } else {
@@ -196,8 +193,8 @@ public class MapModel extends DefaultTableModel {
             this.mapGrid[x][y] = new Entity(Entity.EXIT, icon); //create and exit entity
             // hide the entity by displaying the path icon
             setValueAt(exitIcon, y, x);
-            doorX =x;
-            doorY=y;
+            doorX = x;
+            doorY = y;
         } else {
             putBoxIn(x, y);
         }
@@ -300,30 +297,30 @@ public class MapModel extends DefaultTableModel {
     }
 
     public void setBombOff(int x, int y, int range) {
-    	
-    	int i=0;
-  
-    	//This is for destroying blocks within the range passed in, starts at 1 since 
-    	//otherwise first loop will all break the exact same block you start on
-    	for (i=1;i<range+1;i++){
-    		try {
+
+        int i = 0;
+
+        //This is for destroying blocks within the range passed in, starts at 1 since 
+        //otherwise first loop will all break the exact same block you start on
+        for (i = 1; i < range + 1; i++) {
+            try {
                 changeToPath(x, y);
             } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
                 // there is explosion outside the map because range is outside the border
             }
-    		try {
+            try {
                 changeToPath(x + i, y);
             } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
                 // there is explosion outside the map because range is outside the border
             }
-    		
-    		try {
+
+            try {
                 changeToPath(x - i, y);
             } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
                 // there is explosion outside the map because range is outside the border
             }
-    		
-    		try {
+
+            try {
                 changeToPath(x, y - i);
             } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
                 // there is explosion outside the map because range is outside the border
@@ -333,33 +330,33 @@ public class MapModel extends DefaultTableModel {
             } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
                 // there is explosion outside the map because range is outside the border
             }
-    	}
+        }
 
 
     }
 
     private void changeToPath(int x, int y) {
 
-        if (this.mapGrid[x][y].getType() != Entity.WALL && this.isCellHavePawnOn(x, y)==false) {
+        if (this.mapGrid[x][y].getType() != Entity.WALL && this.isCellHavePawnOn(x, y) == false) {
             putPathIn(x, y);
         }
-        
+
         //Checks to see if a player is in the explosion range
-        if (this.mapGrid[x][y].isPawnOn()){
-        	int id = this.mapGrid[x][y].getPawn();
-        	explosionDeaths.add(id);
-        	
+        if (this.mapGrid[x][y].isPawnOn()) {
+            int id = this.mapGrid[x][y].getPawn();
+            explosionDeaths.add(id);
+
         }
-        
-        
+
+
         //Checks to see if the position blown up is that of the door
-        if (x == doorX && y == doorY){
-        	//setValueAt(exitIcon, y, x);
-        	this.isExitHidden = false;
-        	this.mapGrid[x][y] = new Entity(Entity.EXIT, this.exitIcon);
+        if (x == doorX && y == doorY) {
+            //setValueAt(exitIcon, y, x);
+            this.isExitHidden = false;
+            this.mapGrid[x][y] = new Entity(Entity.EXIT, this.exitIcon);
             setValueAt(this.exitIcon, y, x);
-        	//this.mapGrid[x][y].getType()
+            //this.mapGrid[x][y].getType()
         }
-        
+
     }
 }
