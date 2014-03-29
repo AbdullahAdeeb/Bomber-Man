@@ -9,6 +9,8 @@ import GameView.MapView;
 import UDPCommunication.Connection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,11 +40,12 @@ public class Game {
         com = new Connection(new IncomingActionListener());
 
 
-        long updateDelay = 100;
+        long updateDelay = 1000;  //TODO revert the delay to 100
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 checkInteractions();
+                //TODO uncomment updateAllplayers
                 updateAllPlayers();
 
             }
@@ -69,6 +72,15 @@ public class Game {
         }
     }
 
+    private PlayerPawn findPlayerPawnById(int id){
+        for (int i = 0; i < playerPawns.size(); i++) {
+            if (playerPawns.get(i).getId() == id) {
+                return playerPawns.get(i);
+                
+            }
+        }
+        return null;
+    }
     private void processCommand(ActionEvent e) {
         synchronized (playerPawns) {
             String actionCmd = e.getActionCommand();
@@ -76,20 +88,29 @@ public class Game {
             int cmd = Character.getNumericValue(actionCmd.charAt(1)); //get the command
 
 
+            System.out.println("RECEIVED CMD <" + actionCmd + "> id = "+id +"|| cmd = "+cmd);
             if (id < 0) { // add a new player .. when id is less than zero means id is not yet assigned
-                PlayerPawn p = new PlayerPawn(playerPawns.size(), mapModel);
-                playerPawns.add(p);
-                System.out.println("\n--RECEIVED CMD--\nNew Player: " + p.getId() + "\n");
-                com.sendID(String.valueOf(p.getId()));
-                id = p.getId();
+                try {
+                    String playerIP = actionCmd.substring(3);
+                    InetAddress ipAddr = InetAddress.getByName(playerIP);
+                    PlayerPawn newPawn = new PlayerPawn(playerPawns.size(), ipAddr, mapModel);
+                    System.out.println("\tnew Player:" +newPawn.getId() + " @" + playerIP);
+                    com.sendID(newPawn);
+                    playerPawns.add(newPawn);
+                    id = newPawn.getId();
+
+                } catch (UnknownHostException ex) {
+                    System.err.println(ex);
+                    return;
+                }
             } else if (cmd == 6) { // disconnect command
                 playerPawns.remove(id);
-                System.out.println("\n--RECEIVED CMD--\nPlayer Left: " + id + "\n");
+                System.out.println("\tPlayer Left: " + id + "\n");
             } else if (cmd == 7) { // list current players
                 System.out.println(playerPawns.toArray());
             } else if (cmd == 5) { //do an action with the player
                 if (playerPawns.get(id).isDead()) {
-                    System.out.println("Player: " + id + "is dead, command dropped");
+                    System.out.println("\tPlayer: " + id + "is dead, command dropped");
                 } else {
                     playerPawns.get(id).action(cmd);
 
@@ -104,7 +125,7 @@ public class Game {
                 playerPawns.get(id).action(cmd);
                 System.out.println("\n--RECEIVED CMD--\nPlayer: " + id + "\tCMD: " + cmd);
             }
-            com.send(id, 1, "8");  // send ACK
+            com.send(findPlayerPawnById(id), 1, "8");  // send ACK
 
             //Currently there's an issue where if you move over to where someone died, you also die
             //this is due to the players x and y remaining on the board even after death, need to
@@ -168,10 +189,10 @@ public class Game {
                 return;
             }
 
-            System.out.println("updating all players >>>");
+            System.out.println("updating all players with game state >>>");
             String serialize = mapModel.serialize();
             for (int i = 0; i < playerPawns.size(); i++) {
-                com.send(playerPawns.get(i).getId(), 5, serialize);
+                com.send(playerPawns.get(i), 5, serialize);
             }
         }
     }
@@ -185,8 +206,30 @@ public class Game {
     }
 
     public static void main(String[] args) {
+        
+//        DatagramSocket socket;
+//        DatagramPacket packet;
+//        
+//        String msg = "hello";
+//        try {
+//            packet = new DatagramPacket(msg.getBytes(), msg.getBytes().length,
+//                    InetAddress.getByName("192.168.212.14"),8000);
+//       socket = new DatagramSocket();
+//       socket.send(packet);
+//        } catch (UnknownHostException ex) {
+//            java.util.logging.Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (SocketException ex) {
+//            java.util.logging.Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (IOException ex) {
+//            java.util.logging.Logger.getLogger(Game.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        
+        
+        
+        
+        
         Game game;
-        Logger.writeLogFile("GAME SERVER STARTED <"+new SimpleDateFormat("yyyy/MM/dd_h:mm:ss").format(Calendar.getInstance().getTime())+">");
+        Logger.writeLogFile("GAME SERVER STARTED <" + new SimpleDateFormat("yyyy/MM/dd_h:mm:ss").format(Calendar.getInstance().getTime()) + ">");
         if (args.length > 0) {
             game = new Game(args[0]);
         } else {

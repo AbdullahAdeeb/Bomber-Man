@@ -1,5 +1,6 @@
 package UDPCommunication;
 
+import GameServer.PlayerPawn;
 import java.awt.event.*;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
@@ -12,7 +13,7 @@ import java.util.logging.Logger;
  */
 public class Connection {
 
-    InetAddress player;
+//    InetAddress player;
     DatagramPacket sendPack;
     DatagramSocket recvSock, sendSock;
     Receiver recv;
@@ -20,13 +21,9 @@ public class Connection {
     ActionListener al;  //TODO get the inet address from the client at the first rcv
 
     public Connection(ActionListener al) {
-        try {
-            player = InetAddress.getLocalHost();
             this.al = al;
             init();
-        } catch (UnknownHostException ex) {
-            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
-        }
+       
     }
 
     private void init() {
@@ -37,18 +34,18 @@ public class Connection {
 
     }
 
-    public void sendID(String id) {
-
-        byte[] cmd = new byte[512];
-
-        cmd[0] = Byte.parseByte(id);
+    public void sendID(PlayerPawn pawn) throws UnknownHostException {
+        byte[] cmd = new byte[4];
+        cmd[0] = Byte.parseByte(String.valueOf(pawn.getId()));
         cmd[1] = Byte.parseByte("0");
         cmd[2] = Byte.parseByte("7");
-        sendPack = new DatagramPacket(cmd, cmd.length, player, 8000);
+        sendPack = new DatagramPacket(cmd, cmd.length, pawn.getIp(), 8000);
         sender.sendCmd(sendPack);
     }
 
-    public void send(int id, int c, String msg) {
+    public void send(PlayerPawn player, int c, String msg) {
+        int id = player.getId();
+        InetAddress ip= player.getIp();
         System.out.println("Sending...\nPlayer: " + id + "\tCmd: " + c + "\n");
         String data = String.valueOf(id)+c+msg;
         byte[] cmd = new byte[512];
@@ -58,7 +55,7 @@ public class Connection {
             Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        sendPack = new DatagramPacket(cmd, cmd.length, player, 6000 + id);
+        sendPack = new DatagramPacket(cmd, cmd.length, ip, 6000 + id);
         sender.sendCmd(sendPack);
     }
 

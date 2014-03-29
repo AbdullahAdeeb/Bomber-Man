@@ -16,7 +16,7 @@ class Sender {
     public Sender(){
         
         try {
-            sendSock = new DatagramSocket();
+            this.sendSock = new DatagramSocket();
         } catch (SocketException ex) {
             Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, null, ex);
         }
