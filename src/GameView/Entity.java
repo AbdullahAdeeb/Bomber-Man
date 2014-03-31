@@ -17,6 +17,8 @@ public class Entity {
     public static final int PATH = 333;
     public static final int EXIT = 444;
     public static final int BOMB = 555;
+    public static final int POWERUP = 666;
+    public static final int AI = 777;
     
     private boolean destructable;
     private boolean isPath = false;

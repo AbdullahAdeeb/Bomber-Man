@@ -34,11 +34,15 @@ public class MapModel extends DefaultTableModel {
     private URL BOMB_ICON_DIR = this.getClass().getClassLoader().getResource("res/BOMB1.JPG");
     private URL ENEMY_ICON_DIR = this.getClass().getClassLoader().getResource("res/ENEMY1.JPG");
     private URL PLAYER_ICON_DIR = this.getClass().getClassLoader().getResource("res/PLAYER1.PNG");
+    private URL POWERUP_ICON_DIR = this.getClass().getClassLoader().getResource("res/POWER1.JPG");
+    private URL AI_ICON_DIR = this.getClass().getClassLoader().getResource("res/AI1.JPG");
     private ImageIcon pathIcon;
     private ImageIcon wallIcon;
     private ImageIcon boxIcon;
     private ImageIcon exitIcon;
     private ImageIcon playerIcon;
+    private ImageIcon aiIcon;
+    private ImageIcon powerupIcon;
     MapView viewer;
     boolean isExitHidden = true;
     int width = 10;
@@ -51,6 +55,7 @@ public class MapModel extends DefaultTableModel {
     int doorY = 0;
     boolean doorHidden = true;
     public ArrayList<Integer> explosionDeaths;
+    
 
     public MapModel(String mapFilePath) {
         initImages();
@@ -115,6 +120,8 @@ public class MapModel extends DefaultTableModel {
                         hideExitIn(x, y, pathIcon);
                     } else if (cells[x].equals("p")) {   // 20% of map is boxes
                         putPathIn(x, y);
+                    } else if (cells[x].equals("o")) {   // 20% of map is boxes
+                    	putPowerUpIn(x, y);
                     } else {
                         // TODO investigate wether fall back to a wall or a box or should throw an error 
                     }
@@ -182,10 +189,16 @@ public class MapModel extends DefaultTableModel {
         setValueAt(this.boxIcon, y, x);
     }
 
-    private void putPathIn(int x, int y) {
+    public void putPathIn(int x, int y) {
         this.mapGrid[x][y] = new Entity(Entity.PATH, this.pathIcon);
         setValueAt(this.pathIcon, y, x);
     }
+    
+    private void putPowerUpIn(int x, int y) {
+        this.mapGrid[x][y] = new Entity(Entity.POWERUP, this.powerupIcon);
+        setValueAt(this.powerupIcon, y, x);
+    }
+
 
     private void hideExitIn(int x, int y, ImageIcon icon) {
         if (!isExitSet) {
@@ -211,6 +224,10 @@ public class MapModel extends DefaultTableModel {
 
     public boolean isCellPath(int x, int y) {
         return this.mapGrid[x][y].getType() == Entity.PATH;
+    }
+    
+    public boolean isPowerUp(int x, int y) {
+        return this.mapGrid[x][y].getType() == Entity.POWERUP;
     }
 
     public void setPlayerOnEntity(int id, int x, int y) {
@@ -263,6 +280,8 @@ public class MapModel extends DefaultTableModel {
         playerIcon = new ImageIcon(PLAYER_ICON_DIR);
         enemyIcon = new ImageIcon(ENEMY_ICON_DIR);
         bombIcon = new ImageIcon(BOMB_ICON_DIR);
+        aiIcon = new ImageIcon(AI_ICON_DIR);
+        powerupIcon = new ImageIcon(POWERUP_ICON_DIR);
     }
 
     public String serialize() {
@@ -335,12 +354,12 @@ public class MapModel extends DefaultTableModel {
 
     }
 
-    private void changeToPath(int x, int y) {
+    public void changeToPath(int x, int y) {
 
-        if (this.mapGrid[x][y].getType() != Entity.WALL && this.isCellHavePawnOn(x, y) == false) {
+        if (this.mapGrid[x][y].getType() != Entity.WALL && this.isCellHavePawnOn(x, y) == false && this.mapGrid[x][y].getType() != Entity.POWERUP) {
             putPathIn(x, y);
         }
-
+        
         //Checks to see if a player is in the explosion range
         if (this.mapGrid[x][y].isPawnOn()) {
             int id = this.mapGrid[x][y].getPawn();
@@ -359,4 +378,14 @@ public class MapModel extends DefaultTableModel {
         }
 
     }
+
+	public boolean isCellExit(int i, int y) {
+		// TODO Auto-generated method stub
+		return this.mapGrid[i][y].getType() == Entity.EXIT;
+	}
+
+	public boolean isExitHidden() {
+		// TODO Auto-generated method stub
+		return isExitHidden;
+	}
 }

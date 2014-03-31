@@ -14,10 +14,15 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import java.util.Random;
 
 /**
  *
@@ -28,9 +33,11 @@ public class Game {
     MapModel mapModel;
     MapView mapView;
     ArrayList<PlayerPawn> playerPawns;
+    ArrayList<Enemy> enemyList;
     Connection com;
     Timer timer;
     BlockingQueue<ActionEvent> commandsQ;
+    JFrame frame;
 
     public Game(String mapFilePath) {
         this.commandsQ = new ArrayBlockingQueue<ActionEvent>(1024);
@@ -40,13 +47,36 @@ public class Game {
         com = new Connection(new IncomingActionListener());
 
 
-        long updateDelay = 1000;  //TODO revert the delay to 100
+        long updateDelay = 100;  //TODO revert the delay to 100
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                checkInteractions();
+            	try{
+            		checkInteractions();
+            	}catch(Exception e){
+            		System.out.println("Couldn't check interactions");
+            	}
+                
                 //TODO uncomment updateAllplayers
-                updateAllPlayers();
+            	try{
+            		updateAllPlayers();
+            	}catch(Exception e){
+            		System.out.println("Couldn't update players");
+            	}
+            	
+            	try{
+            		
+            		checkPowerup();
+            	}catch(Exception e){
+            		System.out.println("Couldn't check win");
+            	}
+            	
+            	try{
+            		checkWin();
+            	}catch(Exception e){
+            		System.out.println("Couldn't check win");
+            	}
+                
 
             }
         }, updateDelay, updateDelay);
@@ -104,26 +134,47 @@ public class Game {
                     return;
                 }
             } else if (cmd == 6) { // disconnect command
-                playerPawns.remove(id);
-                System.out.println("\tPlayer Left: " + id + "\n");
+            	
+            	try{
+            		
+            	
+	            	synchronized (playerPawns){
+	            		
+	            		playerPawns.get(id).setDeath();
+	            		//playerPawns.get(id).
+		                //playerPawns.remove(id);
+		                System.out.println("\tPlayer Left: " + id + "\n");
+		                
+		                
+	            	}
+            	}catch(Exception z){
+            		System.out.println("Couldn't disconnect player");
+            	}
+            	
             } else if (cmd == 7) { // list current players
                 System.out.println(playerPawns.toArray());
             } else if (cmd == 5) { //do an action with the player
-                if (playerPawns.get(id).isDead()) {
-                    System.out.println("\tPlayer: " + id + "is dead, command dropped");
-                } else {
-                    playerPawns.get(id).action(cmd);
+            	synchronized (playerPawns){
+            		if (playerPawns.get(id).isDead()) {
+                        System.out.println("\tPlayer: " + id + "is dead, command dropped");
+                    } else {
+                        playerPawns.get(id).action(cmd);
 
-                }
+                    }
+            	}
+                
 
             } else {
-                if (id >= playerPawns.size()) {
-                    // TODO log it using logger
-                    System.out.println("ID Error: " + id);
-                    return;
-                }
-                playerPawns.get(id).action(cmd);
-                System.out.println("\n--RECEIVED CMD--\nPlayer: " + id + "\tCMD: " + cmd);
+            	synchronized (playerPawns){
+            		 if (id >= playerPawns.size()) {
+                         // TODO log it using logger
+                         System.out.println("ID Error: " + id);
+                         return;
+                     }
+                     playerPawns.get(id).action(cmd);
+                     System.out.println("\n--RECEIVED CMD--\nPlayer: " + id + "\tCMD: " + cmd);
+            	}
+               
             }
             com.send(findPlayerPawnById(id), 1, "8");  // send ACK
 
@@ -136,9 +187,92 @@ public class Game {
             checkInteractions();
 
             updateAllPlayers();
+            
+            checkDisconnections();
+            
+            
+           
         }
     }
 
+    
+    public void checkWin(){
+    	
+    	
+    	for (PlayerPawn v : playerPawns){
+    		if (v.checking){
+    			
+    			//Only shows if it's the only player left
+    			if (playerPawns.size()==1){
+    				JOptionPane.showMessageDialog(frame, "Player " + v.getId() + " wins!, game exiting");
+    				
+    				//Sends the client the exit command, and closes
+    				com.send(findPlayerPawnById(playerPawns.get(0).getId()), 9, "9");
+    				System.exit(0);
+    			}
+    			
+    			
+    			v.checking = false;
+    		}
+    	}
+    	
+    	
+    	
+    	
+    }
+    
+    public void checkPowerup(){
+    	for (PlayerPawn v : playerPawns){
+    		if (v.thePower){
+    			
+    			//Gets a random powerup
+    			Random randomGenerator = new Random();
+    			int randomInt = randomGenerator.nextInt(2);
+    			
+    			if (randomInt ==0){
+    				//Powerup for increasing range
+        			v.incRange();
+    			}else{
+    				//Powerup for increasing bomb amount
+    				v.incBombs();
+    			}
+    			
+    			
+    			v.thePower = false;
+    		}
+    	}
+    }
+    
+    public void checkDisconnections(){
+    	
+    	for (PlayerPawn v : playerPawns){
+        	
+        }
+        
+        //Iterator used for removing players from the game when they're dead/disconnected.
+        //Using an interator because otherwise shifting indexes will cause issues
+    	
+    	synchronized (playerPawns){
+	    		
+	    	
+	        Iterator it = playerPawns.iterator(); 
+	        while(it.hasNext()){
+	            PlayerPawn o = (PlayerPawn) it.next();
+	            if (o.isDead()){	
+	            	
+	            	//Causes game to kind of freeze after enemy is killed
+	                //it.remove();
+	            }
+	        }
+	        
+	      //If no players left, server will close
+	        if (playerPawns.isEmpty()){
+	        	JOptionPane.showMessageDialog(frame, "All players have disconnected, exiting game");
+	        	System.exit(0);
+	        }
+    	}
+    }
+    
     //Code that checks for AI, player, interactions
     public void checkInteractions() {
 

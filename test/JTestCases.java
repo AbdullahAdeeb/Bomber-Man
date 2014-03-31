@@ -35,11 +35,11 @@ public class JTestCases {
         URL resource = this.getClass().getClassLoader().getResource("res/map1.xml");
         Game g = new Game(resource.getPath());
         //PlayerPawn player = new PlayerPawn(1, g.getMapModel());
-        PlayerPawn p = new PlayerPawn(g.getPlayerPawns().size(), g.getMapModel());
-        g.getPlayerPawns().add(p);
+       // PlayerPawn p = new PlayerPawn(g.getPlayerPawns().size(), g.getMapModel());
+       // g.getPlayerPawns().add(p);
         //g.id = p.getId();
-        PlayerPawn z = new PlayerPawn(g.getPlayerPawns().size(), g.getMapModel());
-        g.getPlayerPawns().add(z);
+       // PlayerPawn z = new PlayerPawn(g.getPlayerPawns().size(), g.getMapModel());
+      //  g.getPlayerPawns().add(z);
         //fail("Not yet implemented");
         //System.out.println("Test 1: ");
         //System.out.println(g.getMapModel().getMapGrid()[0][0].getType());

@@ -29,12 +29,16 @@ public class PlayerPawn {
     private int bombAllowance;
     private int currentBombs;
     private InetAddress ip;
+    boolean checking = false;
+    boolean thePower = false;
+    private int powerupRange;
 
     public PlayerPawn(int id, InetAddress ip, MapModel mapModel) {
         this.id = id;
         this.ip = ip;
         bombAllowance = 1;
         currentBombs = 0;
+        powerupRange = 1;
 
         this.bombsFactory = new BombsFactory();
 
@@ -45,6 +49,18 @@ public class PlayerPawn {
         this.map.setPlayerOnEntity(id, x, y);
         isDead = false;
 
+    }
+    
+    synchronized public void incRange(){
+    	powerupRange++;
+    }
+    
+    synchronized public void incBombs(){
+    	bombAllowance++;
+    }
+    
+    synchronized public int getRange(){
+    	return powerupRange;
     }
 
     public void action(int direction) {
@@ -58,10 +74,33 @@ public class PlayerPawn {
                     newX++;
                     break;
                 }
+               
+                if (x < this.map.getWidth() - 1 && this.map.isCellExit(x + 1, y) && (!this.map.isExitHidden())) {
+                    newX++;
+                    checking = true;
+                    break;
+                }
+                if (x < this.map.getWidth() - 1 && this.map.isPowerUp(x + 1, y)) {
+                    thePower = true;
+                    newX++;
+                    map.putPathIn(newX, newY);
+                    break;
+                }
                 return;
             case PlayerPawn.LEFT:
                 if (x > 0 && this.map.isCellPath(x - 1, y)) {
                     newX--;
+                    break;
+                }
+                if (x > 0 - 1 && this.map.isCellExit(x - 1, y) && (!this.map.isExitHidden())) {
+                    newX--;
+                    checking = true;
+                    break;
+                }
+                if (x > 0 - 1 && this.map.isPowerUp(x - 1, y)) {
+                    thePower = true;
+                    newX--;
+                    map.putPathIn(newX, newY);
                     break;
                 }
                 return;
@@ -70,10 +109,32 @@ public class PlayerPawn {
                     newY++;
                     break;
                 }
+                if (y < this.map.getHeight() - 1 && this.map.isCellExit(x , y+1) && (!this.map.isExitHidden())) {
+                    newY++;
+                    checking = true;
+                    break;
+                }
+                if (y < this.map.getHeight() - 1 && this.map.isPowerUp(x , y +1)) {
+                    thePower = true;
+                    newY++;
+                    map.putPathIn(newX, newY);
+                    break;
+                }
                 return;
             case PlayerPawn.FORWARD:
                 if (y > 0 && this.map.isCellPath(x, y - 1)) {
                     newY--;
+                    break;
+                }
+                if (y > 0 - 1 && this.map.isCellExit(x , y-1) && (!this.map.isExitHidden())) {
+                    newY--;
+                    checking = true;
+                    break;
+                }
+                if (y > 0 - 1 && this.map.isPowerUp(x , y -1)) {
+                    thePower = true;
+                    newY--;
+                    map.putPathIn(newX, newY);
                     break;
                 }
                 return;
@@ -173,7 +234,7 @@ public class PlayerPawn {
         public void run() {
             // this is the timer that will run when the bomb explodes
             int range = bombsFactory.detonateBomb();
-            map.setBombOff(this.x, this.y, range);
+            map.setBombOff(this.x, this.y, owner.getRange());
             System.out.println("bomb Exploded");
             owner.currentBombs--;
 
