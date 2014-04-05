@@ -33,6 +33,7 @@ public class Game {
     MapModel mapModel;
     MapView mapView;
     ArrayList<PlayerPawn> playerPawns;
+    ArrayList<PlayerPawn> AIPawns;
     ArrayList<Enemy> enemyList;
     Connection com;
     Timer timer;
@@ -40,17 +41,18 @@ public class Game {
     JFrame frame;
 
     public Game(String mapFilePath) {
+        
         this.commandsQ = new ArrayBlockingQueue<ActionEvent>(1024);
         timer = new Timer();
         this.mapModel = new MapModel(mapFilePath);
         playerPawns = new ArrayList();
         com = new Connection(new IncomingActionListener());
-
-
+        
         long updateDelay = 100;  //TODO revert the delay to 100
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                
             	try{
             		checkInteractions();
             	}catch(Exception e){
@@ -64,8 +66,7 @@ public class Game {
             		System.out.println("Couldn't update players");
             	}
             	
-            	try{
-            		
+            	try{		
             		checkPowerup();
             	}catch(Exception e){
             		System.out.println("Couldn't check win");
@@ -76,11 +77,10 @@ public class Game {
             	}catch(Exception e){
             		System.out.println("Couldn't check win");
             	}
-                
 
             }
         }, updateDelay, updateDelay);
-
+        
         while (true) {
             /**
              * synchronized (commandsQ) { if (!commandsQ.isEmpty()) {
@@ -98,33 +98,31 @@ public class Game {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-
         }
     }
 
     private PlayerPawn findPlayerPawnById(int id){
         for (int i = 0; i < playerPawns.size(); i++) {
             if (playerPawns.get(i).getId() == id) {
-                return playerPawns.get(i);
-                
+                return playerPawns.get(i);     
             }
         }
         return null;
     }
+    
     private void processCommand(ActionEvent e) {
         synchronized (playerPawns) {
             String actionCmd = e.getActionCommand();
             int id = Character.getNumericValue(actionCmd.charAt(0));
             int cmd = Character.getNumericValue(actionCmd.charAt(1)); //get the command
 
-
-            System.out.println("RECEIVED CMD <" + actionCmd + "> id = "+id +"|| cmd = "+cmd);
+            logEvent("RECEIVED CMD <" + actionCmd + "> id = " + id + "|| cmd = " + cmd);
             if (id < 0) { // add a new player .. when id is less than zero means id is not yet assigned
                 try {
                     String playerIP = actionCmd.substring(3);
                     InetAddress ipAddr = InetAddress.getByName(playerIP);
                     PlayerPawn newPawn = new PlayerPawn(playerPawns.size(), ipAddr, mapModel);
-                    System.out.println("\tnew Player:" +newPawn.getId() + " @" + playerIP);
+                    Logger.writeLogFile("++++New player:" + newPawn.getId() + " @" + playerIP + " +++");
                     com.sendID(newPawn);
                     playerPawns.add(newPawn);
                     id = newPawn.getId();
@@ -135,17 +133,14 @@ public class Game {
                 }
             } else if (cmd == 6) { // disconnect command
             	
-            	try{
-            		
-            	
+            	try{	
 	            	synchronized (playerPawns){
 	            		
 	            		playerPawns.get(id).setDeath();
 	            		//playerPawns.get(id).
 		                //playerPawns.remove(id);
-		                System.out.println("\tPlayer Left: " + id + "\n");
-		                
-		                
+		               // System.out.println("\tPlayer Left: " + id + "\n");
+                                logEvent("---Player Left: " + id + " ---");        
 	            	}
             	}catch(Exception z){
             		System.out.println("Couldn't disconnect player");
@@ -156,25 +151,21 @@ public class Game {
             } else if (cmd == 5) { //do an action with the player
             	synchronized (playerPawns){
             		if (playerPawns.get(id).isDead()) {
-                        System.out.println("\tPlayer: " + id + "is dead, command dropped");
+                        logEvent("Player: " + id + " died");
                     } else {
                         playerPawns.get(id).action(cmd);
-
                     }
             	}
-                
-
             } else {
             	synchronized (playerPawns){
             		 if (id >= playerPawns.size()) {
                          // TODO log it using logger
-                         System.out.println("ID Error: " + id);
+                         logEvent("***ID ERROR: " + id + " ***");
                          return;
                      }
                      playerPawns.get(id).action(cmd);
                      System.out.println("\n--RECEIVED CMD--\nPlayer: " + id + "\tCMD: " + cmd);
-            	}
-               
+            	}     
             }
             com.send(findPlayerPawnById(id), 1, "8");  // send ACK
 
@@ -182,26 +173,18 @@ public class Game {
             //this is due to the players x and y remaining on the board even after death, need to
             //change these to something like -1,-1, but this causes out of bounds errors
 
-
             //Code that checks for AI, player, interactions
             checkInteractions();
-
-            updateAllPlayers();
-            
+            updateAllPlayers();       
             checkDisconnections();
-            
-            
-           
+         
         }
     }
-
-    
+   
     public void checkWin(){
-    	
     	
     	for (PlayerPawn v : playerPawns){
     		if (v.checking){
-    			
     			//Only shows if it's the only player left
     			if (playerPawns.size()==1){
     				JOptionPane.showMessageDialog(frame, "Player " + v.getId() + " wins!, game exiting");
@@ -209,9 +192,7 @@ public class Game {
     				//Sends the client the exit command, and closes
     				com.send(findPlayerPawnById(playerPawns.get(0).getId()), 9, "9");
     				System.exit(0);
-    			}
-    			
-    			
+    			}   			
     			v.checking = false;
     		}
     	}
@@ -251,10 +232,8 @@ public class Game {
         
         //Iterator used for removing players from the game when they're dead/disconnected.
         //Using an interator because otherwise shifting indexes will cause issues
-    	
     	synchronized (playerPawns){
-	    		
-	    	
+	    			
 	        Iterator it = playerPawns.iterator(); 
 	        while(it.hasNext()){
 	            PlayerPawn o = (PlayerPawn) it.next();
@@ -268,6 +247,7 @@ public class Game {
 	      //If no players left, server will close
 	        if (playerPawns.isEmpty()){
 	        	JOptionPane.showMessageDialog(frame, "All players have disconnected, exiting game");
+                        logEvent("All Players have died. Disconnnecting game");
 	        	System.exit(0);
 	        }
     	}
@@ -302,6 +282,13 @@ public class Game {
         }
 
     }
+    
+    private void logEvent(String e){
+        
+        String time = new SimpleDateFormat("yyyy/MM/dd_h:mm:ss").format(Calendar.getInstance().getTime());
+        String log = e + "\t\t" + time;
+        Logger.writeLogFile(log);
+    }
 
     class IncomingActionListener implements ActionListener {
 
@@ -323,7 +310,7 @@ public class Game {
                 return;
             }
 
-            System.out.println("updating all players with game state >>>");
+            //System.out.println("updating all players with game state >>>");
             String serialize = mapModel.serialize();
             for (int i = 0; i < playerPawns.size(); i++) {
                 com.send(playerPawns.get(i), 5, serialize);
@@ -369,7 +356,6 @@ public class Game {
         } else {
             game = new Game(null);
         }
-
 
     }
 }

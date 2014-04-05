@@ -63,12 +63,12 @@ public class PlayerPawn {
     	return powerupRange;
     }
 
-    public void action(int direction) {
+    public void action(int action) {
 
         int newX = x;
         int newY = y;
 
-        switch (direction) {
+        switch (action) {
             case PlayerPawn.RIGHT:
                 if (x < this.map.getWidth() - 1 && this.map.isCellPath(x + 1, y)) {
                     newX++;
